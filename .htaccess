@@ -1,0 +1,6 @@
+Options -Indexes
+RewriteEngine On
+RewriteRule ^(config|src|templates|database|storage)(/|$) - [F,L]
+RewriteRule ^$ public/ [L]
+RewriteRule ^public/ - [L]
+RewriteRule (.*) public/$1 [L]

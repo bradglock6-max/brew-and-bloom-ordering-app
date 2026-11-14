@@ -1,0 +1,6 @@
+Options -Indexes
+<FilesMatch "\.(php|phtml|phar)$">
+    <If "%{REQUEST_URI} =~ m#/assets/uploads/#">
+        Require all denied
+    </If>
+</FilesMatch>
