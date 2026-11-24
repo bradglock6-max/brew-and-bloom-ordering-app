@@ -89,56 +89,62 @@ if (isset($_GET['edit'])) {
 }
 $categories = $cats->getAll(true);
 $rows = $products->getAllWithCategory(true);
-$pageTitle = 'Products';
+$pageTitle = 'Menu Products';
 require __DIR__ . '/../../templates/admin_header.php';
 ?>
-<h2>Products</h2>
 <?php if ($flash): ?><div class="<?= $flash[0] === 'ok' ? 'alert-success' : 'alert-error' ?>"><?= e($flash[1]) ?></div><?php endif; ?>
 
-<div class="panel">
-  <h3><?= $edit ? 'Edit Product' : 'Add Product' ?></h3>
-  <form method="post" action="products.php" enctype="multipart/form-data">
-    <?= csrfField() ?>
-    <input type="hidden" name="action" value="<?= $edit ? 'update' : 'create' ?>">
-    <?php if ($edit): ?><input type="hidden" name="id" value="<?= (int)$edit['id'] ?>"><?php endif; ?>
-    <div class="form-grid">
-      <div><label for="name">Name</label><input type="text" id="name" name="name" maxlength="120" required value="<?= e($edit['name'] ?? '') ?>"></div>
-      <div><label for="category_id">Category</label>
-        <select id="category_id" name="category_id" required>
-          <?php foreach ($categories as $c): ?>
-            <option value="<?= (int)$c['id'] ?>" <?= ($edit && (int)$edit['category_id'] === (int)$c['id']) ? 'selected' : '' ?>><?= e($c['name']) ?></option>
-          <?php endforeach; ?>
-        </select></div>
-      <div><label for="price">Price (₱)</label><input type="number" id="price" name="price" step="0.01" min="0" required value="<?= e(isset($edit['price']) ? (string)$edit['price'] : '') ?>"></div>
-      <div><label for="image">Image (JPG/PNG/WEBP, max 2MB)</label><input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp">
-        <?php if ($edit && $edit['image_path']): ?><div class="current-img"><img class="thumb" src="<?= e(BASE_URL . '/' . $edit['image_path']) ?>" alt=""><small>Current image</small></div><?php endif; ?></div>
-      <div class="full"><label for="description">Description</label><textarea id="description" name="description" rows="3"><?= e($edit['description'] ?? '') ?></textarea></div>
-      <div class="full"><label><input type="checkbox" name="is_available" value="1" <?= (!$edit || $edit['is_available']) ? 'checked' : '' ?>> Available</label></div>
-    </div>
-    <button type="submit" class="btn"><?= $edit ? 'Save Changes' : 'Add Product' ?></button>
-    <?php if ($edit): ?><a class="btn btn-secondary" href="products.php">Cancel</a><?php endif; ?>
-  </form>
-</div>
+<div class="catalog-split">
+  <div class="panel">
+    <h3><?= $edit ? 'Edit Menu Product' : 'Add Menu Product' ?></h3>
+    <form method="post" action="products.php" enctype="multipart/form-data">
+      <?= csrfField() ?>
+      <input type="hidden" name="action" value="<?= $edit ? 'update' : 'create' ?>">
+      <?php if ($edit): ?><input type="hidden" name="id" value="<?= (int)$edit['id'] ?>"><?php endif; ?>
+      <div class="form-grid">
+        <div class="full"><label for="name">Product Name</label><input type="text" id="name" name="name" maxlength="120" required value="<?= e($edit['name'] ?? '') ?>"></div>
+        <div><label for="category_id">Category</label>
+          <select id="category_id" name="category_id" required>
+            <?php foreach ($categories as $c): ?>
+              <option value="<?= (int)$c['id'] ?>" <?= ($edit && (int)$edit['category_id'] === (int)$c['id']) ? 'selected' : '' ?>><?= e($c['name']) ?></option>
+            <?php endforeach; ?>
+          </select></div>
+        <div><label for="price">Price (₱)</label><input type="number" id="price" name="price" step="0.01" min="0" required value="<?= e(isset($edit['price']) ? (string)$edit['price'] : '') ?>"></div>
+        <div class="full"><label for="image">Image (JPG/PNG/WEBP, max 2MB)</label><input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp">
+          <?php if ($edit && $edit['image_path']): ?><div class="current-img"><img class="thumb" src="<?= e(BASE_URL . '/' . $edit['image_path']) ?>" alt=""><small>Current image</small></div><?php endif; ?></div>
+        <div class="full"><label for="description">Description</label><textarea id="description" name="description" rows="3"><?= e($edit['description'] ?? '') ?></textarea></div>
+        <div class="full"><label style="text-transform:none;color:var(--ink)"><input type="checkbox" name="is_available" value="1" <?= (!$edit || $edit['is_available']) ? 'checked' : '' ?>> Available for Ordering</label></div>
+      </div>
+      <div class="actions" style="margin-top:1rem">
+        <button type="submit" class="btn" style="margin:0"><?= $edit ? 'Save Changes' : 'Add Product' ?></button>
+        <?php if ($edit): ?><a class="btn btn-secondary" style="margin:0" href="products.php">Cancel</a><?php endif; ?>
+      </div>
+    </form>
+  </div>
 
-<div class="panel table-wrap">
-  <table class="data">
-    <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody>
-    <?php foreach ($rows as $p): ?>
-      <tr>
-        <td><?php if ($p['image_path']): ?><img class="thumb" src="<?= e(BASE_URL . '/' . $p['image_path']) ?>" alt=""><?php else: ?><span class="thumb"></span><?php endif; ?></td>
-        <td><?= e($p['name']) ?></td>
-        <td><?= e($p['category_name']) ?></td>
-        <td>₱<?= number_format((float)$p['price'], 2) ?></td>
-        <td><span class="status <?= $p['is_available'] ? 'status-available' : 'status-soldout' ?>"><?= $p['is_available'] ? 'Available' : 'Sold Out' ?></span></td>
-        <td><div class="actions">
-          <form method="post" action="products.php"><?= csrfField() ?><input type="hidden" name="action" value="toggle_availability"><input type="hidden" name="id" value="<?= (int)$p['id'] ?>"><button type="submit" class="btn btn-sm btn-secondary"><?= $p['is_available'] ? 'Mark Sold Out' : 'Mark Available' ?></button></form>
-          <a class="btn btn-sm" href="products.php?edit=<?= (int)$p['id'] ?>">Edit</a>
-          <form method="post" action="products.php" onsubmit="return confirm('Deactivate this product?');"><?= csrfField() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)$p['id'] ?>"><button type="submit" class="btn btn-sm btn-danger">Deactivate</button></form>
-        </div></td>
-      </tr>
-    <?php endforeach; ?>
-    </tbody>
-  </table>
+  <div class="panel table-wrap">
+    <div class="panel-head">
+      <h3>Active Menu Catalog (<?= count($rows) ?>)</h3>
+    </div>
+    <table class="data">
+      <thead><tr><th>Image</th><th>Product</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+      <?php foreach ($rows as $p): ?>
+        <tr>
+          <td><?php if ($p['image_path']): ?><img class="thumb" src="<?= e(BASE_URL . '/' . $p['image_path']) ?>" alt=""><?php else: ?><span class="thumb">&#9749;</span><?php endif; ?></td>
+          <td><strong><?= e($p['name']) ?></strong><?php if ($p['description']): ?><br><span class="meta"><?= e($p['description']) ?></span><?php endif; ?></td>
+          <td><span class="cat-pill"><?= e($p['category_name']) ?></span></td>
+          <td><strong>₱<?= number_format((float)$p['price'], 2) ?></strong></td>
+          <td><span class="status <?= $p['is_available'] ? 'status-available' : 'status-soldout' ?>"><?= $p['is_available'] ? 'Available' : 'Sold Out' ?></span></td>
+          <td><div class="actions">
+            <form method="post" action="products.php"><?= csrfField() ?><input type="hidden" name="action" value="toggle_availability"><input type="hidden" name="id" value="<?= (int)$p['id'] ?>"><button type="submit" class="btn btn-sm btn-secondary"><?= $p['is_available'] ? 'Mark Sold Out' : 'Mark Available' ?></button></form>
+            <a class="btn btn-sm btn-outline" href="products.php?edit=<?= (int)$p['id'] ?>">Edit</a>
+            <form method="post" action="products.php" onsubmit="return confirm('Deactivate this product?');"><?= csrfField() ?><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int)$p['id'] ?>"><button type="submit" class="btn btn-sm btn-danger">Deactivate</button></form>
+          </div></td>
+        </tr>
+      <?php endforeach; ?>
+      </tbody>
+    </table>
+  </div>
 </div>
 <?php require __DIR__ . '/../../templates/admin_footer.php'; ?>

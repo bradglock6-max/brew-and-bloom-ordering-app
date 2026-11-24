@@ -1,6 +1,21 @@
-</main>
+    </main>
+  </div>
+</div>
 <script>
 (function () {
+  var sidebar = document.getElementById('admin-sidebar');
+  var backdrop = document.getElementById('sidebar-backdrop');
+  var openBtn = document.getElementById('sidebar-open');
+  var closeBtn = document.getElementById('sidebar-close');
+  function toggleSidebar(show) {
+    if (!sidebar || !backdrop) return;
+    sidebar.classList.toggle('open', show);
+    backdrop.classList.toggle('show', show);
+  }
+  if (openBtn) openBtn.addEventListener('click', function () { toggleSidebar(true); });
+  if (closeBtn) closeBtn.addEventListener('click', function () { toggleSidebar(false); });
+  if (backdrop) backdrop.addEventListener('click', function () { toggleSidebar(false); });
+
   var badge = document.getElementById('pending-orders-badge');
   if (!badge) return;
   var last = parseInt(badge.textContent, 10) || 0;

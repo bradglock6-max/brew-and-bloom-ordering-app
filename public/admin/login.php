@@ -27,11 +27,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin Login - Brew &amp; Bloom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= e(BASE_URL) ?>/assets/css/admin.css">
 </head>
 <body>
 <div class="login-wrap">
   <form class="card" method="post" action="login.php" autocomplete="off">
+    <span class="eyebrow">ROASTERY COMMAND CENTER</span>
     <h1>Brew &amp; Bloom Admin</h1>
     <?php if ($error !== ''): ?><div class="alert"><?= e($error) ?></div><?php endif; ?>
     <?= csrfField() ?>

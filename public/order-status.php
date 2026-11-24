@@ -40,6 +40,9 @@ $idx = $order ? array_search($order['status'], $steps, true) : false;
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Order Status - Brew &amp; Bloom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= e(BASE_URL) ?>/assets/css/store.css">
 </head>
 <body>
@@ -49,7 +52,7 @@ $idx = $order ? array_search($order['status'], $steps, true) : false;
 </header>
 <div class="layout"><div class="narrow">
 <?php if ($fresh): ?>
-  <div class="alert alert-info">Thank you! Your order has been placed. Save your reference code: <strong><?= e($order['order_code']) ?></strong></div>
+  <div class="alert alert-info">Thank you! Your order has been received. Save your reference code: <strong><?= e($order['order_code']) ?></strong></div>
   <script>try{localStorage.removeItem('bb_cart_v1');}catch(e){}</script>
 <?php endif; ?>
 <?php if ($error): ?><div class="alert alert-error"><?= e($error) ?></div><?php endif; ?>
@@ -57,22 +60,23 @@ $idx = $order ? array_search($order['status'], $steps, true) : false;
 <?php if (!$order): ?>
 <div class="card">
   <h2>Track Your Order</h2>
+  <p class="meta">Enter your order reference code and the phone number used at checkout to check live preparation progress.</p>
   <form method="post" action="order-status.php" class="checkout-form">
     <?= csrfField() ?>
     <label for="code">Order Reference Code</label>
     <input type="text" id="code" name="code" maxlength="20" required value="<?= e($prefill) ?>" placeholder="BB-XXXXXX">
     <label for="phone">Phone Number</label>
     <input type="tel" id="phone" name="phone" maxlength="20" required>
-    <button type="submit" class="btn btn-block" style="margin-top:1rem">Check Status</button>
+    <button type="submit" class="btn btn-block" style="margin-top:1.15rem">Check Status</button>
   </form>
 </div>
 <?php else: ?>
 <div class="card">
-  <h2>Order <?= e($order['order_code']) ?> <span class="status-pill <?= $bad ? 'bad' : '' ?>"><?= e($order['status']) ?></span></h2>
+  <h2><span>Order <?= e($order['order_code']) ?></span> <span class="status-pill <?= $bad ? 'bad' : '' ?>"><?= e($order['status']) ?></span></h2>
   <p class="meta">Placed <?= e($order['created_at']) ?> &middot; <?= e(ucfirst($order['fulfillment_type'])) ?></p>
 
   <?php if ($bad): ?>
-    <div class="alert alert-error">This order was <?= e($order['status']) ?>.<?= $order['rejection_reason'] ? ' Reason: ' . e($order['rejection_reason']) : '' ?></div>
+    <div class="alert alert-error" style="margin-top:1rem">This order was <?= e($order['status']) ?>.<?= $order['rejection_reason'] ? ' Reason: ' . e($order['rejection_reason']) : '' ?></div>
   <?php else: ?>
   <ol class="tracker">
     <?php foreach ($steps as $i => $s): $cls = $i < $idx ? 'done' : ($i === $idx ? 'current' : ''); ?>
@@ -93,7 +97,7 @@ $idx = $order ? array_search($order['status'], $steps, true) : false;
       <tr class="total-row"><td colspan="3">Total</td><td class="num">₱<?= number_format((float)$order['total_amount'], 2) ?></td></tr>
     </tbody>
   </table>
-  <p style="margin-top:1rem"><a class="btn btn-light btn-sm" href="order-status.php">Look up another order</a></p>
+  <p style="margin-top:1.25rem;margin-bottom:0"><a class="btn btn-light btn-sm" href="order-status.php">Look up another order</a></p>
 </div>
 <?php endif; ?>
 </div></div>

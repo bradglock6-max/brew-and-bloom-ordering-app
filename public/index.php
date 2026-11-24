@@ -18,6 +18,30 @@ unset($_SESSION['checkout_error']);
 
 $activeCatIds = array_column($categories, 'id');
 $products = array_values(array_filter($products, fn($p) => (int)$p['is_active'] === 1 && in_array($p['category_id'], $activeCatIds)));
+
+function fallbackProductImage(string $name, string $categoryName): string
+{
+    $hay = strtolower($name . ' ' . $categoryName);
+    if (str_contains($hay, 'brown sugar') || str_contains($hay, 'pearl')) {
+        return 'https://images.unsplash.com/photo-1558857563-b371033873b8?auto=format&fit=crop&w=700&q=80';
+    }
+    if (str_contains($hay, 'wintermelon') || str_contains($hay, 'milk tea')) {
+        return 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=700&q=80';
+    }
+    if (str_contains($hay, 'matcha') || str_contains($hay, 'green tea') || str_contains($hay, 'passion') || str_contains($hay, 'fruit')) {
+        return 'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=700&q=80';
+    }
+    if (str_contains($hay, 'cold brew') || str_contains($hay, 'caramel')) {
+        return 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=700&q=80';
+    }
+    if (str_contains($hay, 'latte') || str_contains($hay, 'espresso') || str_contains($hay, 'coffee')) {
+        return 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=700&q=80';
+    }
+    if (str_contains($hay, 'waffle') || str_contains($hay, 'snack') || str_contains($hay, 'pastry')) {
+        return 'https://images.unsplash.com/photo-1562376552-0d160a2f238d?auto=format&fit=crop&w=700&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=700&q=80';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,6 +49,9 @@ $products = array_values(array_filter($products, fn($p) => (int)$p['is_active'] 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?= e($storeName) ?> - Order Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="<?= e(BASE_URL) ?>/assets/css/store.css">
 </head>
 <body>
@@ -37,6 +64,12 @@ $products = array_values(array_filter($products, fn($p) => (int)$p['is_active'] 
 </header>
 <div class="layout has-cart">
 <main>
+  <section class="hero-banner">
+    <span class="hero-eyebrow">SMALL-BATCH ROASTS &amp; ONLINE ORDERING</span>
+    <h2>Artisanal Espresso, Signature Milk Teas &amp; Warm Pastries</h2>
+    <p>Crafted to order with single-origin espresso, ceremonial-grade tea leaves, and house-made syrups for pickup or local delivery.</p>
+  </section>
+
   <?php if ($error): ?><div class="alert alert-error"><?= e($error) ?></div><?php endif; ?>
   <?php if (!$open): ?><div class="alert alert-error">Store is currently closed for online orders.</div><?php endif; ?>
   <div class="tabs">
@@ -46,17 +79,24 @@ $products = array_values(array_filter($products, fn($p) => (int)$p['is_active'] 
     <?php endforeach; ?>
   </div>
   <div class="product-grid">
-    <?php foreach ($products as $p): $sold = (int)$p['is_available'] === 0; ?>
+    <?php foreach ($products as $p):
+        $sold = (int)$p['is_available'] === 0;
+        $imgSrc = $p['image_path']
+            ? BASE_URL . '/' . $p['image_path']
+            : fallbackProductImage((string)$p['name'], (string)$p['category_name']);
+    ?>
     <article class="product-card" data-cat="<?= (int)$p['category_id'] ?>">
       <div class="img">
-        <?php if ($p['image_path']): ?><img src="<?= e(BASE_URL . '/' . $p['image_path']) ?>" alt="<?= e($p['name']) ?>" loading="lazy"><?php else: ?><span aria-hidden="true">🧋</span><?php endif; ?>
+        <img src="<?= e($imgSrc) ?>" alt="<?= e($p['name']) ?>" loading="lazy">
         <?php if ($sold): ?><span class="badge-soldout">Sold Out</span><?php endif; ?>
       </div>
       <div class="product-body">
         <h3><?= e($p['name']) ?></h3>
         <p><?= e($p['description']) ?></p>
-        <div class="price">₱<?= number_format((float)$p['price'], 2) ?></div>
-        <button type="button" class="btn btn-sm add-to-cart" data-id="<?= (int)$p['id'] ?>" data-name="<?= e($p['name']) ?>" data-price="<?= e((string)$p['price']) ?>" <?= $sold ? 'disabled' : '' ?>><?= $sold ? 'Sold Out' : 'Add' ?></button>
+        <div class="product-foot">
+          <div class="price">₱<?= number_format((float)$p['price'], 2) ?></div>
+          <button type="button" class="btn btn-sm add-to-cart" data-id="<?= (int)$p['id'] ?>" data-name="<?= e($p['name']) ?>" data-price="<?= e((string)$p['price']) ?>" <?= $sold ? 'disabled' : '' ?>><?= $sold ? 'Sold Out' : 'Add to Order' ?></button>
+        </div>
       </div>
     </article>
     <?php endforeach; ?>
@@ -65,7 +105,7 @@ $products = array_values(array_filter($products, fn($p) => (int)$p['is_active'] 
 
 <div id="cart-overlay" class="overlay"></div>
 <aside id="cart-panel" class="cart-panel" aria-label="Cart">
-  <div class="cart-head"><h2>Your Cart</h2><button type="button" id="cart-close" class="btn btn-sm btn-light cart-close">Close</button></div>
+  <div class="cart-head"><h2>Your Order</h2><button type="button" id="cart-close" class="btn btn-sm btn-light cart-close">Close</button></div>
   <div class="cart-body"><div id="cart-items"></div></div>
   <div class="cart-foot">
     <div class="subtotal"><span>Subtotal</span><span id="cart-subtotal">₱0.00</span></div>
